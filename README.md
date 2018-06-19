@@ -1,2 +1,2 @@
-# Kabarak UNiversity IoT Outreach workshop
+# Kabarak University IoT Outreach workshop
 
