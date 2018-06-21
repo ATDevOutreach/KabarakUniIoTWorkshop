@@ -9,9 +9,6 @@
 // LCD 
 
 // TODO 
-// Collect Data
-
-// TODO 
 // handle message callback
 
 // Digital pins
@@ -49,6 +46,7 @@ const char light_topic[] = "kabarak/atmega/sensors/light";
 const char main_room_light[] = "kabarak/atmega/appliance/led_main";
 const char bed_room_light[]= "kabarak/atmega/appliance/led_bed"; 
 const char alarm_topic[] = "kabarak/atmega/appliance/alarm";
+const char presence_topic[] = "kabarak/atmega/presence"
 
 // Payload
 char message[30];
@@ -80,8 +78,9 @@ void wifi101CallBack(char* topic, byte* payload, unsigned int length);
 // void publishProximity(float distance);
 // void publishLightIntensisty(float intensity);
 void publishMetric(float metric, char* topic);
-long getPromixityValues(void);
+float getPromixityValues(void);
 void manageRoom(char* room_name, String room_state);
+void presenceHandler(int presence);
 void loop(void);
 void setup(void);
 bool reconn = false;
@@ -120,6 +119,27 @@ void loop(void)
         reconectToMQTT();   
     }   
     
+    // Collect Humidity , Temp, Presence (using PIR sensor), proximity and light intensity
+    float humidity = dht.getHumidity();
+    float temperature = dht.getTemperature();
+    int presence = digitalRead(pir_pin);
+    float prox = getPromixityValues();
+    float light_intensity = analogRead(LDR_PIN);
+
+    // send everything to the server
+    publishMetric(humidity, humidity_topic);
+    publishMetric(temperature, temperature_topic);
+    publishMetric(prox, proximity_topic);
+    publishMetric(light_intensity, light_topic);
+    presenceHandler(presence); // This is really bad, esssentially there should be some delay... but \_(-.-)_/
+
+    
+}
+
+void presenceHandler(int presence)
+{
+    int presence_ = presence;
+    presence_ = 1 ? client.publish(presence_topic, "TRUE", mqtt_qos_level) : client.publish(presence_topic, "FALSE", mqtt_qos_level); 
 }
 
 void manageRoom(String room_name, String room_state)
@@ -243,7 +263,7 @@ void publishMetric(float metric, char* topic)
 }
 
 
-long getPromixityValues()
+float getPromixityValues()
 {
     digitalWrite(trigger_pin,LOW);
     delayMicroseconds(5);
@@ -251,7 +271,7 @@ long getPromixityValues()
     delayMicroseconds(10);
     digitalWrite(trigger_pin,LOW);
     long duration = pulseIn(echo_pin,HIGH);
-    long distance_ = (duration/2)/29.1;
+    float distance_ = (duration/2)/29.1;
     return distance_;
 }
 
