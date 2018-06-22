@@ -31,6 +31,7 @@ DHT dht;
 
 void setup()
 {
+    pinMode(led_pin, OUTPUT);
     connectToWifi();
     dht.setup(dht_pin);
 }
