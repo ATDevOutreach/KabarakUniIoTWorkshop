@@ -4,6 +4,7 @@
 #include "WiFi101.h"
 #include "DHT.h"
 #include <Servo.h>
+#include "AfricasTalkingCloud.h"
 
 
 // Digital pins
@@ -47,8 +48,8 @@ const char presence_topic[] = "kabarak/atmega/presence";
 char message[30];
 
 // Other
-const char ssid[] = "africastalking";
-const char password[] = "password";
+const char ssid[] = {"africastalking"};
+const char password[] = {"password"};
 int status = WL_IDLE_STATUS;
 uint8_t pin_state = 0;
 uint8_t mqtt_qos_level = 1;
@@ -78,8 +79,8 @@ float getPromixityValues(void);
 void manageRoom(String room_name, String room_state);
 void presenceHandler(int presence);
 void proximityHandler(float proximity);
-void motorPositionHandler(float proximity = nullptr); // This might be controlled by the proximity values
-boolean isRoomTopic(String topic); 
+void motorPositionHandler(float proximity = NULL); // This might be controlled by the proximity values
+boolean isRoomTopic(char topic[]); 
 void alarmManager(void);
 void loop(void);
 void setup(void);
@@ -88,7 +89,7 @@ bool reconn = false;
 
 WiFiClient client101;
 AfricasTalkingCloudClient client(wifi101CallBack, client101);
-
+DHT dht;
 LiquidCrystal lcd(lcd_pin);
 
 void setup(void)
@@ -100,7 +101,7 @@ void setup(void)
     pinMode(led_pin_3_bed, OUTPUT);
     pinMode(led_pin_4_main_colored, OUTPUT);
     pinMode(pir_pin, OUTPUT);
-    pinMode(echop_pin, OUTPUT);
+    pinMode(echo_pin, OUTPUT);
     pinMode(trigger_pin, INPUT);
     dht.setup(dht_pin);
     connectToWAP(ssid, password);
@@ -177,65 +178,53 @@ void manageRoom(String room_name, String room_state)
     String room,state;
     room = room_name;
     state = room_state;
-    
-    switch (room)
-    {
-        case "main" :
-            
+
+        if(room == "main"){
             if (state ==  "PRESENCE") {
                 // User enters room
                 digitalWrite(led_pin_1_main, !pin_state);
                 digitalWrite(led_pin_2_aux, !pin_state);
                 digitalWrite(led_pin_4_main_colored, pin_state);
-                continue;
             }
             else if(state == "ABSENCE") {
                 // User goes to another room (bed room)
                 digitalWrite(led_pin_2_aux, pin_state);
-                continue;
             }
             else if(state == "OUT") {
                 // User leaves room
                 digitalWrite(led_pin_2_aux, pin_state);
                 digitalWrite(led_pin_1_main, pin_state);
                 digitalWrite(led_pin_4_main_colored, pin_state);
-                continue;
             } 
             else if (state == "ALLOFF") {
                 digitalWrite(led_pin_1_main, pin_state);
                 digitalWrite(led_pin_2_aux, pin_state);
                 digitalWrite(led_pin_4_main_colored, pin_state);
-                continue;
             }
             else if (state == "COLORED") {
                 digitalWrite(led_pin_4_main_colored, !pin_state);
-                continue;
             }
             else if (state == "SPEAK") {
                 alarmManager();
-                continue;
             } else if(state == "INTENSITY") {
                 digitalWrite(led_pin_1_main, !pin_state);
                 digitalWrite(led_pin_2_aux, !pin_state);
                 digitalWrite(led_pin_4_main_colored, !pin_state);
-                continue;
             }
             else {
-               continue;
+                ;
             }
-            break;
-        case "bed" :
-            
+        }
+        if(room == "bed")
+        {
             if (state == "LIGHT") {
                 digitalWrite(led_pin_3_bed, !pin_state);
-                continue;
             } else if(state == "DRAW") {
-                for(servo_pos = 0; i < 180; servo_pos++)
+                for(servo_pos = 0; servo_pos < 180; servo_pos++)
                 {
                     curtain_motor.write(servo_pos);
                     delay(15);
                 }
-                continue;
             } else if(state == "UNDRAW") {
                 servo_pos = 0; // Just ensure that the servo angle is 0, otherwise this could result into a huge bug
                 int servo_cur_pos = curtain_motor.read(); // Get actual servo position : hard to tell [!INTERESTING]
@@ -244,26 +233,22 @@ void manageRoom(String room_name, String room_state)
                     curtain_motor.write(servo_cur_pos);
                     delay(15);
                 }
-                continue;
             } else if (state == "LIGHTOFF") {
                 digitalWrite(led_pin_3_bed, pin_state);
-                continue;
             }            
             else {
                 // Unimplemented
-                continue;
+                ;
             }
-            break;
-        case "garage" :
+        }
+        if(room == "garage")
+        {
             // This is governed by the proximity sensor
             // for the unsimulated  -- omit [!INTERESTING]
             if (state == "APPROACH") {
                 motorPositionHandler();
             }
-            break;
-        default:
-            break;
-    }
+        }
 }
 
 void publishMetric(float metric, char* topic)
@@ -293,24 +278,24 @@ void reconectToMQTT(void)
         client.connect(device_id, mqtt_username, mqtt_passowrd);
         client.publish(birth_topic, "birth", mqtt_qos_level);
         client.subscribe(main_room_light);
-        client.subscribe(bed_room_light);
+       // client.subscribe(bed_room_light);
         client.subscribe(light_topic); // For increasing intensity
         client.subscribe(main_room_topic);
         client.subscribe(garage_door_topic);
-        client.subscribe(window_manage_topic); // For closing and opening windows   
+       // client.subscribe(window_manage_topic); // For closing and opening windows   
     }   
 }
 
 void connectToWAP(const char* ssid, const char* password)
 {   
-    const char ssid_[] = ssid;
-    const char w_pass_[] = password; 
+    const char* ssid_ = {ssid};
+    const char* w_pass_ = {password}; 
     if (WiFi.status() == WL_NO_SHIELD) {
         while(true)
         {
-        digitalWrite(led_pin_1, !pin_state);
+        digitalWrite(led_pin_2_aux, !pin_state);
         delay(1000);
-        digitalWrite(led_pin_1, pin_state);
+        digitalWrite(led_pin_2_aux, pin_state);
         delay(1000);
         }
     }
@@ -332,7 +317,7 @@ void proximityHandler(float proximity)
     motorPositionHandler(proximity_);
 }
 
-void motorPositionHandler(float proximity = nullptr)
+void motorPositionHandler(float proximity = NULL)
 {
     int motor_angle = garage_motor.read();
     float proxim = proximity;
@@ -344,19 +329,20 @@ void motorPositionHandler(float proximity = nullptr)
         {
             garage_motor.write(motor_angle);
             delay(15);
-        }
-        continue;
+    
         } 
+    }
     if (motor_angle < 180 || active) {
             servo_pos = 0 ; // [!INTERESTING]
             for(servo_pos; servo_pos < 180; servo_pos++)
             {
-                digitalWrite(servo_pos);
+                garage_motor.write(servo_pos);
                 delay(15);
             }
-            continue;
         }
 }
+
+
 
 void wifi101CallBack(char* topic, byte* payload, unsigned int length)
 {
@@ -366,7 +352,7 @@ void wifi101CallBack(char* topic, byte* payload, unsigned int length)
     //2.a. Route to func
     //3. Do something else
     String command = ""; // This is the MQTT payload we've received
-    String topic_ = (String)topic;
+    char* topic_ = {topic};
     
     for(unsigned int i = 0; i < length; i++)
     {
@@ -374,33 +360,24 @@ void wifi101CallBack(char* topic, byte* payload, unsigned int length)
     }
     if(isRoomTopic(topic_))
     {
-        
-        switch (topic_)
-        {
-            case main_room_topic :
+        // Switches in C can not handle anything beyond char and int
+            if(topic_ == main_room_topic)
                 manageRoom("main", command);
-                break;
-            case bed_room_topic :
+            if(topic_ == bed_room_topic)
                 manageRoom("bed", command);
-                break;
-            case garage_door_topic :
+            if(topic_ == garage_door_topic)
                 manageRoom("garage", command);
-                break;    
-            default:
-                break;
-        }
     }
-    
     if (topic_ == alarm_topic) {
        alarmManager();
     }
     
 }
 
-boolean isRoomTopic(String topic)
+boolean isRoomTopic(char topic[])
 {
-    String topic_ = topic;
-    topic_.subString(15) == "room";
+    String topic_ = (String)topic;
+    topic_.substring(15) == "room";
     return true;
 }
 
