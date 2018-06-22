@@ -46,7 +46,7 @@ const char light_topic[] = "kabarak/atmega/sensors/light";
 const char main_room_light[] = "kabarak/atmega/appliance/led_main";
 const char bed_room_light[]= "kabarak/atmega/appliance/led_bed"; 
 const char alarm_topic[] = "kabarak/atmega/appliance/alarm";
-const char presence_topic[] = "kabarak/atmega/presence"
+const char presence_topic[] = "kabarak/atmega/presence";
 
 // Payload
 char message[30];
@@ -160,7 +160,7 @@ void manageRoom(String room_name, String room_state)
                 continue;
             }
             else if(state == "ABSENCE") {
-                // User goes to another room
+                // User goes to another room (bed room)
                 digitalWrite(led_pin_2_aux, pin_state);
                 continue;
             }
@@ -175,6 +175,7 @@ void manageRoom(String room_name, String room_state)
                 digitalWrite(led_pin_1_main, pin_state);
                 digitalWrite(led_pin_2_aux, pin_state);
                 digitalWrite(led_pin_4_main_colored, pin_state);
+                continue;
             }
             else if (state == "COLORED") {
                 digitalWrite(led_pin_4_main_colored, !pin_state);
@@ -184,6 +185,7 @@ void manageRoom(String room_name, String room_state)
                 digitalWrite(buzzer_pin, !pin_state);
                 delay(7500);
                 digitalWrite(buzzer_pin, pin_state);
+                continue;
             } else if(state == "INTENSITY") {
                 digitalWrite(led_pin_1_main, !pin_state);
                 digitalWrite(led_pin_2_aux, !pin_state);
@@ -225,7 +227,7 @@ void manageRoom(String room_name, String room_state)
             }
             break;
         case "garage" :
-
+            // This is governed by the proximity sensor
             if (state == "APPROACH") {
                 int motor_angle = garage_motor.read();
                 
@@ -307,4 +309,10 @@ void connectToWAP(const char* ssid, const char* password)
          delay(10000);
          reconn = true;
      }
+}
+
+void wifi101CallBack(char* topic, byte* payload, unsigned int length)
+{
+    // Get message packet and topic and pass to correct functions
+
 }
