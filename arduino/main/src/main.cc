@@ -5,11 +5,6 @@
 #include "DHT.h"
 #include <Servo.h>
 
-// TODO 
-// LCD 
-
-// TODO 
-// handle message callback
 
 // Digital pins
 uint8_t led_pin_1_main = 42; // main room light 1
@@ -38,14 +33,14 @@ const char birth_topic[] = "kabarak/atmega/birth";
 const char main_room_topic[] = "kabarak/atmega/room/main";
 const char garage_door_topic[] = "kabarak/atmega/room/garage";
 const char bed_room_topic[] = "kabarak/atmega/room/bed";
-const char window_manage_topic[] = "kabarak/atmega/room/window";
+// const char window_manage_topic[] = "kabarak/atmega/room/bed/window";
 const char temperature_topic[] = "kabarak/atmega/sensors/temp";
 const char humidity_topic[] = "kabarak/atmega/sensors/humidity";
 const char proximity_topic[] ="kabarak/atmega/sensors/proximity";
 const char light_topic[] = "kabarak/atmega/sensors/light";
 const char main_room_light[] = "kabarak/atmega/appliance/led_main";
-const char bed_room_light[]= "kabarak/atmega/appliance/led_bed"; 
-const char alarm_topic[] = "kabarak/atmega/appliance/alarm";
+// const char bed_room_light[]= "kabarak/atmega/appliance/room/bed/led_bed"; 
+const char alarm_topic[] = "kabarak/atmega/appliance/room/main/alarm";
 const char presence_topic[] = "kabarak/atmega/presence";
 
 // Payload
@@ -57,6 +52,7 @@ const char password[] = "password";
 int status = WL_IDLE_STATUS;
 uint8_t pin_state = 0;
 uint8_t mqtt_qos_level = 1;
+uint8_t lcd_pin = 5;
 
 // Servo Control
 uint8_t servo_pos = 0;
@@ -79,8 +75,12 @@ void wifi101CallBack(char* topic, byte* payload, unsigned int length);
 // void publishLightIntensisty(float intensity);
 void publishMetric(float metric, char* topic);
 float getPromixityValues(void);
-void manageRoom(char* room_name, String room_state);
+void manageRoom(String room_name, String room_state);
 void presenceHandler(int presence);
+void proximityHandler(float proximity);
+void motorPositionHandler(float proximity = nullptr); // This might be controlled by the proximity values
+boolean isRoomTopic(String topic); 
+void alarmManager(void);
 void loop(void);
 void setup(void);
 bool reconn = false;
@@ -88,6 +88,8 @@ bool reconn = false;
 
 WiFiClient client101;
 AfricasTalkingCloudClient client(wifi101CallBack, client101);
+
+LiquidCrystal lcd(lcd_pin);
 
 void setup(void)
 {
@@ -105,6 +107,9 @@ void setup(void)
     garage_motor.attach(servo_pin_1_garage);
     main_motor.attach(servo_pin_2_main);
     curtain_motor.attach(servo_pin_3_curtains);
+    lcd.begin(20,4); // Assuming a 20x16 LCD
+    lcd.print("Initlilized");
+
 }
 
 void loop(void)
@@ -125,15 +130,40 @@ void loop(void)
     int presence = digitalRead(pir_pin);
     float prox = getPromixityValues();
     float light_intensity = analogRead(LDR_PIN);
-
+    char temp[50],h[50],li[50];
+    // Stringify e'rything \_(-.-)_/
+    snprintf(temp,40,"%f",temperature);
+    snprintf(h,40,"%f",humidity);
+    snprintf(li,40,"%f",light_intensity);
     // send everything to the server
     publishMetric(humidity, humidity_topic);
     publishMetric(temperature, temperature_topic);
     publishMetric(prox, proximity_topic);
     publishMetric(light_intensity, light_topic);
     presenceHandler(presence); // This is really bad, esssentially there should be some delay... but \_(-.-)_/
+    // We can manually call the proximity handler here
+    // proximityHandler(prox);
+    // Display these stuff on the LCD screen
+    lcd.clear();
+    lcd.setCursor(0,1);
+    lcd.print("Temp:");
+    lcd.setCursor(1,1);
+    lcd.print(temp);
+    delay(1500);
+    lcd.clear();
+    lcd.setCursor(0,1);
+    lcd.print("Humidity:");
+    lcd.setCursor(1,1);
+    lcd.print(h);
+    delay(1500);
+    lcd.clear();
+    lcd.setCursor(0,1);
+    lcd.print("L.intensity:");
+    lcd.setCursor(1,1);
+    lcd.print(li);
+    delay(1500);
+    lcd.clear();
 
-    
 }
 
 void presenceHandler(int presence)
@@ -182,9 +212,7 @@ void manageRoom(String room_name, String room_state)
                 continue;
             }
             else if (state == "SPEAK") {
-                digitalWrite(buzzer_pin, !pin_state);
-                delay(7500);
-                digitalWrite(buzzer_pin, pin_state);
+                alarmManager();
                 continue;
             } else if(state == "INTENSITY") {
                 digitalWrite(led_pin_1_main, !pin_state);
@@ -228,27 +256,9 @@ void manageRoom(String room_name, String room_state)
             break;
         case "garage" :
             // This is governed by the proximity sensor
+            // for the unsimulated  -- omit [!INTERESTING]
             if (state == "APPROACH") {
-                int motor_angle = garage_motor.read();
-                
-                if (motor_angle > 0) {
-                    
-                    for(motor_angle; motor_angle > 0; motor_angle --)
-                    {
-                        garage_motor.write(motor_angle);
-                        delay(15);
-                    }
-                    continue;
-                }
-                else {
-                    servo_pos = 0 ; // [!INTERESTING]
-                    for(servo_pos; servo_pos < 180; i++)
-                    {
-                        digitalWrite(servo_pos);
-                        delay(15);
-                    }
-                    continue;
-                }
+                motorPositionHandler();
             }
             break;
         default:
@@ -260,7 +270,7 @@ void publishMetric(float metric, char* topic)
 {
     float metric_ = metric;
     char* topic_ = topic;
-    snprintf(message, 40, "%f", metric_);
+    snprintf(message, 20, "%f", metric_);
     client.publish(topic_, message, mqtt_qos_level);
 }
 
@@ -308,11 +318,95 @@ void connectToWAP(const char* ssid, const char* password)
          status = WiFi.begin(ssid_, w_pass_);
          delay(10000);
          reconn = true;
+         lcd.clear();
+         lcd.setCursor(0,1);
+         lcd.print("WiFi Status:");
+         lcd.setCursor(1,1);
+         lcd.print("Connected");
      }
+}
+
+void proximityHandler(float proximity)
+{
+    float proximity_ = proximity;
+    motorPositionHandler(proximity_);
+}
+
+void motorPositionHandler(float proximity = nullptr)
+{
+    int motor_angle = garage_motor.read();
+    float proxim = proximity;
+    boolean active = false;
+    proxim < 15.00 ? active = true : active = false;
+    if (motor_angle > 0 || active) {
+                   
+        for(motor_angle; motor_angle > 0; motor_angle--)
+        {
+            garage_motor.write(motor_angle);
+            delay(15);
+        }
+        continue;
+        } 
+    if (motor_angle < 180 || active) {
+            servo_pos = 0 ; // [!INTERESTING]
+            for(servo_pos; servo_pos < 180; servo_pos++)
+            {
+                digitalWrite(servo_pos);
+                delay(15);
+            }
+            continue;
+        }
 }
 
 void wifi101CallBack(char* topic, byte* payload, unsigned int length)
 {
     // Get message packet and topic and pass to correct functions
+    //1. Get topic
+    //2. Room topic?
+    //2.a. Route to func
+    //3. Do something else
+    String command = ""; // This is the MQTT payload we've received
+    String topic_ = (String)topic;
+    
+    for(unsigned int i = 0; i < length; i++)
+    {
+        command += (char)payload[i];
+    }
+    if(isRoomTopic(topic_))
+    {
+        
+        switch (topic_)
+        {
+            case main_room_topic :
+                manageRoom("main", command);
+                break;
+            case bed_room_topic :
+                manageRoom("bed", command);
+                break;
+            case garage_door_topic :
+                manageRoom("garage", command);
+                break;    
+            default:
+                break;
+        }
+    }
+    
+    if (topic_ == alarm_topic) {
+       alarmManager();
+    }
+    
+}
 
+boolean isRoomTopic(String topic)
+{
+    String topic_ = topic;
+    topic_.subString(15) == "room";
+    return true;
+}
+
+void alarmManager(void)
+{
+    digitalWrite(buzzer_pin, !pin_state);
+    delay(7500);
+    digitalWrite(buzzer_pin, pin_state);
 }
