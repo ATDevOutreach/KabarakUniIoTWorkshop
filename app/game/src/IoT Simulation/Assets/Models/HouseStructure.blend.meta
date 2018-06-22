@@ -15,6 +15,10 @@ ModelImporter:
     100018: GlassWindow_001
     100020: Cube_006
     100022: GlassWindow_002
+    100024: Cube_007
+    100026: GarageDoor
+    100028: Cube_008
+    100030: Roofing
     400000: //RootNode
     400002: Cube
     400004: Cube_001
@@ -27,6 +31,10 @@ ModelImporter:
     400018: GlassWindow_001
     400020: Cube_006
     400022: GlassWindow_002
+    400024: Cube_007
+    400026: GarageDoor
+    400028: Cube_008
+    400030: Roofing
     2100000: Material
     2100002: ExtDarkColor
     2100004: IntLivingRoomColor
@@ -37,6 +45,10 @@ ModelImporter:
     2100014: WoodFinish
     2100016: IronRodFinish
     2100018: GlassMat
+    2100020: Wardrobe
+    2100022: GarageDoor
+    2100024: unnamed
+    2100026: ExtRoof
     2300000: //RootNode
     2300002: Cube
     2300004: Cube_001
@@ -49,6 +61,10 @@ ModelImporter:
     2300018: GlassWindow_001
     2300020: Cube_006
     2300022: GlassWindow_002
+    2300024: Cube_007
+    2300026: GarageDoor
+    2300028: Cube_008
+    2300030: Roofing
     3300000: //RootNode
     3300002: Cube
     3300004: Cube_001
@@ -61,6 +77,10 @@ ModelImporter:
     3300018: GlassWindow_001
     3300020: Cube_006
     3300022: GlassWindow_002
+    3300024: Cube_007
+    3300026: GarageDoor
+    3300028: Cube_008
+    3300030: Roofing
     4300000: Cube
     4300002: Cube_001
     4300004: Cube_003
@@ -72,6 +92,10 @@ ModelImporter:
     4300016: Cube_004
     4300018: Cube_006
     4300020: GlassWindow_002
+    4300022: Cube_007
+    4300024: GarageDoor
+    4300026: Cube_008
+    4300028: Roofing
     7400000: Default Take
     9500000: //RootNode
   externalObjects:
