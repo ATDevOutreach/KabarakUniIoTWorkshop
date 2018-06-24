@@ -98,5 +98,5 @@
         <icon height="128" src="/platforms/chrome/icon.png" width="128" />
     </platform>
     <plugin name="cordova-plugin-mqtt" spec="^0.3.8" />
-    <engine name="android" spec="~7.0.0" />
+    <engine name="android" spec="^7.0.0" />
 </widget>
