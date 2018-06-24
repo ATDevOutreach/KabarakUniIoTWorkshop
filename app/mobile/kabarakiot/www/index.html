@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+  <meta name="theme-color" content="#00BCD4">
   <script src="components/loader.js"></script>
   <script src="lib/onsenui/js/onsenui.min.js"></script>
 
@@ -16,45 +17,86 @@
     ons.ready(function() {
       console.log("Onsen UI is ready!");
     });
-
-    document.addEventListener('show', function(event) {
-      var page = event.target;
-      var titleElement = document.querySelector('#toolbar-title');
-
-      if (page.matches('#first-page')) {
-        titleElement.innerHTML = 'My app - Page 1';
-      } else if (page.matches('#second-page')) {
-        titleElement.innerHTML = 'My app - Page 2';
-      }
-    });
   </script>
 </head>
 <body>
   <ons-page>
-    <ons-toolbar>
-      <div class="center" id="toolbar-title"></div>
-    </ons-toolbar>
-    <ons-tabbar position="auto">
-      <ons-tab label="Tab 1" page="tab1.html" active>
+    <ons-tabbar material position="auto" swipeable>
+      <ons-tab label="Dashboard" page="status.page.html" active>
       </ons-tab>
-      <ons-tab label="Tab 2" page="tab2.html">
-      </ons-tab>
-    </ons-tabbar>
   </ons-page>
 
-  <ons-template id="tab1.html">
-    <ons-page id="first-page">
-      <p style="text-align: center;">
-        This is the first page.
-      </p>
-    </ons-page>
-  </ons-template>
-
-  <ons-template id="tab2.html">
-    <ons-page id="second-page">
-      <p style="text-align: center;">
-        This is the second page.
-      </p>
+  <ons-template id="status.page.html">
+    <ons-page id="status-page">
+      <ons-row>
+        <ons-col>
+          <ons-card>
+            <div class="title">Temperature</div>
+            <div class="content">
+              <ons-progress-circular id="temp-ind" value="25"></ons-progress-circular>
+            </div>
+          </ons-card>
+        </ons-col>
+        <ons-col>
+            <ons-card>
+              <div class="title">Humidity</div>
+              <div class="content">
+                <ons-progress-circular id="hum-ind" value="75"></ons-progress-circular>
+              </div>
+            </ons-card>
+          </ons-col>
+      </ons-row>
+      <ons-card>
+          <div class="title">Main Controls</div>
+          <div class="content">
+          <ons-row>  
+            <ons-button style="margin-top: 1.5px; margin-bottom: 1.5px;" modifier="material large" id="door-ctrl">
+              Door
+            </ons-button>
+          </ons-row>
+            <ons-row>
+            <ons-button style="margin-top: 1.5px; margin-bottom: 1.5px;" modifier="material large" id="window-ctrl">
+                Window
+              </ons-button>
+            </ons-row>
+          </div>
+      </ons-card>
+      <ons-card>
+        <div class="title">
+          Light Settings
+        </div>
+        <div class="content">
+        <ons-list>
+            <ons-list-item style="margin-top: 1.0px;margin-bottom: 1.0px;">
+              <div class="center">
+                Toggle Light
+              </div>
+              <div class="right">
+                <ons-switch id="light-ctl"></ons-switch>
+              </div>
+          </ons-list-item>
+          <ons-list-item style="margin-top: 1.0px;margin-bottom: 1.0px;">
+            <div class="content">
+              Adjust Brightness
+            </div>
+            <ons-row>
+                    <ons-col width="40px" style="text-align: center; line-height: 31px;">
+                        <ons-icon icon="md-brightness-low"></ons-icon>
+                      </ons-col>
+                      <ons-col>
+                        <ons-range style="width: 100%;" value="25"></ons-range>
+                      </ons-col>
+                      <ons-col width="40px" style="text-align: center; line-height: 31px;">
+                        <ons-icon icon="md-brightness-high"></ons-icon>
+                      </ons-col>
+            </ons-row>
+          </ons-list-item>
+        </ons-list>
+        </div>
+      </ons-card>
+      <ons-fab id="alarm-fab" position="bottom right">
+        <ons-icon icon="md-alert-circle"></ons-icon>
+      </ons-fab>
     </ons-page>
   </ons-template>
 </body>

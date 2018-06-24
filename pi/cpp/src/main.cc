@@ -10,3 +10,7 @@
 #include "mraa/common.hpp"
 #include "mraa/aio.hpp"
 
+#define LDR_PIN NN // TBD
+#define ULTRA_PIN NN // TBD
+#define LED_MAIN_ROOM_PIN NN //TBD
+#define LED_MAIN_ROOM_AUX_PIN NN //TBD
