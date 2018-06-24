@@ -20,14 +20,10 @@
   </script>
 </head>
 <body>
-  <ons-page>
-    <ons-tabbar material position="auto" swipeable>
-      <ons-tab label="Dashboard" page="status.page.html" active>
-      </ons-tab>
-  </ons-page>
-
-  <ons-template id="status.page.html">
     <ons-page id="status-page">
+      <ons-toolbar>
+        <div class="center">Dashboard</div>
+      </ons-toolbar>
       <ons-row>
         <ons-col>
           <ons-card>
@@ -98,6 +94,5 @@
         <ons-icon icon="md-alert-circle"></ons-icon>
       </ons-fab>
     </ons-page>
-  </ons-template>
 </body>
 </html>
