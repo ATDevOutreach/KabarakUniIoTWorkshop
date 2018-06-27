@@ -18,7 +18,7 @@ Java 8
     ```bash 
     user@host:~# rpm -ivh  <package.rpm>
     ```
-+ For the zipped download you'll have to manually move it to a preferred directory such as `/opt/java/` or `home/user/java` or `usr/bin/java` : create if does not exist.
++ For the zipped download you'll have to manually move it to a preferred directory such as `/opt/java/` or `home/user/java` or `usr/java` : create if does not exist.
     ```bash 
     user@host:~# mv <extracted-java-jdk-folder> /home/user/java 
     ```
@@ -56,7 +56,7 @@ Java 8
  + Extract to obtain a `tools` folder. Move this `tools` folder to the `home/user/androidsdk/` folder created earlier.
  + Next, download and extract Android `platform-tools` [from the official site](https://developer.android.com/studio/releases/platform-tools).
  + Move the `platforms-tools` to the `home/user/androidsdk` folder.
- + You should have such as layout  
+ + You should have such a layout  
     ```bash 
     ...
     drwxr-xr-x  5 user    user    NNNN MM DD 20:08 platform-tools
