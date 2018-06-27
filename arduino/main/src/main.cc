@@ -48,12 +48,14 @@ const char presence_topic[] = "kabarak/atmega/presence";
 char message[30];
 
 // Other
-const char ssid[] = {"africastalking"};
-const char password[] = {"password"};
+const char ssid[] = "RedEye";
+const char password[] = "#uaua54@1932";
 int status = WL_IDLE_STATUS;
 uint8_t pin_state = 0;
 uint8_t mqtt_qos_level = 1;
 uint8_t lcd_pin = 5;
+uint8_t brightness = 0;
+uint8_t fade_interval = 10;
 
 // Servo Control
 uint8_t servo_pos = 0;
@@ -95,6 +97,8 @@ LiquidCrystal lcd(lcd_pin);
 void setup(void)
 {
     WiFi.setPins(10, 3, 4);
+    Serial.begin(9600);
+    while(!Serial);
     pinMode(pir_pin, INPUT);
     pinMode(led_pin_1_main, OUTPUT);
     pinMode(led_pin_2_aux, OUTPUT);
@@ -110,6 +114,9 @@ void setup(void)
     curtain_motor.attach(servo_pin_3_curtains);
     lcd.begin(20,4); // Assuming a 20x16 LCD
     lcd.print("Initlilized");
+    digitalWrite(led_pin_1_main, !pin_state);
+    delay(1500);
+    digitalWrite(led_pin_2_aux, pin_state);
 
 }
 
@@ -202,14 +209,22 @@ void manageRoom(String room_name, String room_state)
                 digitalWrite(led_pin_4_main_colored, pin_state);
             }
             else if (state == "COLORED") {
+                digitalWrite(led_pin_4_main_colored, pin_state);
+                delay(1000);
                 digitalWrite(led_pin_4_main_colored, !pin_state);
             }
             else if (state == "SPEAK") {
                 alarmManager();
             } else if(state == "INTENSITY") {
                 digitalWrite(led_pin_1_main, !pin_state);
-                digitalWrite(led_pin_2_aux, !pin_state);
                 digitalWrite(led_pin_4_main_colored, !pin_state);
+                brightness = brightness + fade_interval;
+                digitalWrite(led_pin_2_aux, pin_state);
+                for( brightness; brightness < 255 ; brightness += fade_interval)
+                {
+                    analogWrite(led_pin_2_aux, brightness);
+                }
+                digitalWrite(led_pin_2_aux, pin_state);
             }
             else {
                 ;
@@ -277,7 +292,7 @@ void reconectToMQTT(void)
     while(!client.connected()){
         client.connect(device_id, mqtt_username, mqtt_passowrd);
         client.publish(birth_topic, "birth", mqtt_qos_level);
-        client.subscribe(main_room_light);
+        //   client.subscribe(main_room_light);
        // client.subscribe(bed_room_light);
         client.subscribe(light_topic); // For increasing intensity
         client.subscribe(main_room_topic);
@@ -293,6 +308,7 @@ void connectToWAP(const char* ssid, const char* password)
     if (WiFi.status() == WL_NO_SHIELD) {
         while(true)
         {
+        Serial.print(F("WiFi Shield Un-available"));
         digitalWrite(led_pin_2_aux, !pin_state);
         delay(1000);
         digitalWrite(led_pin_2_aux, pin_state);
@@ -302,6 +318,12 @@ void connectToWAP(const char* ssid, const char* password)
      while(WiFi.status() != WL_CONNECTED){
          status = WiFi.begin(ssid_, w_pass_);
          delay(10000);
+         if(status)
+         {
+         Serial.println(F("Connected to WiFi"));
+         } else {
+         Serial.println(F("Fatal Error connecting"));
+         }
          reconn = true;
          lcd.clear();
          lcd.setCursor(0,1);
