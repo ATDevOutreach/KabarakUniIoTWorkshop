@@ -1,28 +1,3 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
-  <meta name="theme-color" content="#00BCD4">
-  <script src="components/loader.js"></script>
-  <script src="lib/onsenui/js/onsenui.min.js"></script>
-
-  <link rel="stylesheet" href="components/loader.css">
-  <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
-  <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components.css">
-  <link rel="stylesheet" href="css/style.css">
-
-  <script>
-    ons.ready(function() {
-      console.log("Onsen UI is ready!");
-    });
-    if (cordova.platformId == 'android') {
-    StatusBar.backgroundColorByHexString("#00BCD4");
-    }
-  </script>
-  <!-- <script src="lib/js/app.js"></script> -->
-  <script>
 let connected = false;
 let received_topic = "";
 var app = {
@@ -50,7 +25,7 @@ var app = {
             ons.notification.toast("Fatal connection error", { timeout: 3500 });
         } else {
             temp_topic = "kabarak/mobile/sensors/temperature";
-            cordova.plugins.CordovaMqTTPlugin.subscribe({
+            window.plugins.CordovaMqTTPlugin.subscribe({
                 topic: temp_topic,
                 qos:1,
                 success: (s) =>{
@@ -71,7 +46,7 @@ var app = {
             ons.notification.toast("Fatal connection error", { timeout: 3500 });
         } else {
             humidity_topic = "kabarak/mobile/sensors/humidity";
-            cordova.plugins.CordovaMqTTPlugin.subscribe({
+            window.plugins.CordovaMqTTPlugin.subscribe({
                 topic: temp_topic,
                 qos:1,
                 success: (s) =>{
@@ -90,7 +65,7 @@ var app = {
 
     connectToServer: () =>
     {
-        cordova.plugins.CordovaMqTTPlugin.publish({
+        window.plugins.CordovaMqTTPlugin.publish({
             topic:"kabarak/mobile/control/door",
             payload: "door"
         });connect({
@@ -125,7 +100,7 @@ var app = {
             if (!connected) {
                 ons.notification.toast("Connection error!", { timeout: 3000 });
             } else {
-                cordova.plugins.CordovaMqTTPlugin.publish({
+                window.plugins.CordovaMqTTPlugin.publish({
                     topic:"kabarak/mobile/control/door",
                     payload: "door",
                     qos:1,
@@ -143,7 +118,7 @@ var app = {
             if(!connected){
                 ons.notification.toast("Connection error!", { timeout: 3500 });
             } else {
-                cordova.plugins.CordovaMqTTPlugin.publish({
+                window.plugins.CordovaMqTTPlugin.publish({
                     topic: "kabarak/mobile/control/door",
                     payload: "window",
                     qos: 1,
@@ -160,82 +135,3 @@ var app = {
         console.log("Event id " + id);
     }
 }
-  </script>
-</head>
-<body>
-    <ons-page id="status-page">
-      <ons-toolbar>
-        <div class="center">Dashboard</div>
-      </ons-toolbar>
-      <ons-row>
-        <ons-col>
-          <ons-card>
-            <div class="title">Temperature</div>
-            <div class="content">
-              <ons-progress-circular id="temp-ind" value="25"></ons-progress-circular>
-            </div>
-          </ons-card>
-        </ons-col>
-        <ons-col>
-            <ons-card>
-              <div class="title">Humidity</div>
-              <div class="content">
-                <ons-progress-circular id="hum-ind" value="75"></ons-progress-circular>
-              </div>
-            </ons-card>
-          </ons-col>
-      </ons-row>
-      <ons-card>
-          <div class="title">Main Controls</div>
-          <div class="content">
-          <ons-row>  
-            <ons-button style="margin-top: 1.5px; margin-bottom: 1.5px;" modifier="material large" id="door-ctrl">
-              Door
-            </ons-button>
-          </ons-row>
-            <ons-row>
-            <ons-button style="margin-top: 1.5px; margin-bottom: 1.5px;" modifier="material large" id="window-ctrl">
-                Window
-              </ons-button>
-            </ons-row>
-          </div>
-      </ons-card>
-      <ons-card>
-        <div class="title">
-          Light Settings
-        </div>
-        <div class="content">
-        <ons-list>
-            <ons-list-item style="margin-top: 1.0px;margin-bottom: 1.0px;">
-              <div class="center">
-                Toggle Light
-              </div>
-              <div class="right">
-                <ons-switch id="light-ctl"></ons-switch>
-              </div>
-          </ons-list-item>
-          <ons-list-item style="margin-top: 1.0px;margin-bottom: 1.0px;">
-            <div class="content">
-              Adjust Brightness
-            </div>
-            <ons-row>
-                    <ons-col width="40px" style="text-align: center; line-height: 31px;">
-                        <ons-icon icon="md-brightness-low"></ons-icon>
-                      </ons-col>
-                      <ons-col>
-                        <ons-range style="width: 100%;" value="25"></ons-range>
-                      </ons-col>
-                      <ons-col width="40px" style="text-align: center; line-height: 31px;">
-                        <ons-icon icon="md-brightness-high"></ons-icon>
-                      </ons-col>
-            </ons-row>
-          </ons-list-item>
-        </ons-list>
-        </div>
-      </ons-card>
-      <ons-fab id="alarm-fab" position="bottom right">
-        <ons-icon icon="md-alert-circle"></ons-icon>
-      </ons-fab>
-    </ons-page>
-</body>
-</html>

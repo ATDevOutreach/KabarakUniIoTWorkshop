@@ -35,6 +35,9 @@
     <preference name="UIWebViewDecelerationSpeed" value="normal" />
     <preference name="monaca:AndroidIsPackageNameSeparate" value="false" />
     <preference name="ios-XCBuildConfiguration-TARGETED_DEVICE_FAMILY" value="1,2" />
+    <preference name="StatusBarOverlaysWebView" value="true" />
+    <preference name="StatusBarBackgroundColor" value="#00BCD4" />
+    <preference name="StatusBarStyle" value="lightcontent" />
     <feature name="LocalStorage">
         <param name="ios-package" value="CDVLocalStorage" />
     </feature>
@@ -98,5 +101,5 @@
         <icon height="128" src="/platforms/chrome/icon.png" width="128" />
     </platform>
     <plugin name="cordova-plugin-mqtt" spec="^0.3.8" />
-    <engine name="android" spec="^7.0.0" />
+    <plugin name="cordova-plugin-statusbar" spec="^2.4.2" />
 </widget>
