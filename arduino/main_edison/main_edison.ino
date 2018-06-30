@@ -96,7 +96,6 @@ LiquidCrystal lcd(lcd_pin);
 
 void setup(void)
 {
-    WiFi.setPins(10, 3, 4);
     Serial.begin(9600);
     while(!Serial);
     pinMode(pir_pin, INPUT);
