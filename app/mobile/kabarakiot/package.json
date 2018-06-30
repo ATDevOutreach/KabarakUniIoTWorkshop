@@ -3,6 +3,7 @@
   "dependencies": {
     "cordova-android": "^7.0.0",
     "cordova-custom-config": "^5.0.2",
+    "cordova-plugin-device": "^2.0.2",
     "cordova-plugin-mqtt": "^0.3.8",
     "cordova-plugin-splashscreen": "^5.0.1",
     "cordova-plugin-statusbar": "^2.4.2",
@@ -16,7 +17,8 @@
       "cordova-plugin-whitelist": {},
       "monaca-plugin-monaca-core": {},
       "cordova-plugin-mqtt": {},
-      "cordova-plugin-statusbar": {}
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-device": {}
     },
     "platforms": []
   }

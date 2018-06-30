@@ -17,12 +17,43 @@
     ons.ready(function() {
       console.log("Onsen UI is ready!");
     });
+
+
+    document.addEventListener("deviceready", onDeviceReady, false);
+    function onDeviceReady() {
+    console.log(device.cordova);
     if (cordova.platformId == 'android') {
     StatusBar.backgroundColorByHexString("#00BCD4");
     }
+    window.plugins.CordovaMqTTPlugin.connect({
+        url: "sungura1-angani-ke-host.africastalking.com",
+        port:10883,
+        uname: "kabarak",
+        clientId: "kabarak-app",
+        success: (s) =>
+        {
+            connected = true;
+                // Green color the bar // TODO
+            ons.notification.toast("Connected!", { timeout: 2000});
+            console.log("Connected");
+            },
+            error: (e) =>{
+            connected = false;
+                // Color the bar Red
+            ons.notification.toast("Fatal error: " + e , { timeout: 3000 });
+        },
+        onConnectionLost: () =>
+        {
+            connected = false;
+                // Color the bar red
+            ons.notification.toast("Connection Lost", { timeout: 3000 });
+        }
+    });
+    }
+
   </script>
-  <!-- <script src="lib/js/app.js"></script> -->
-  <script>
+<!-- 
+<script>
 let connected = false;
 let received_topic = "";
 var app = {
@@ -160,7 +191,7 @@ var app = {
         console.log("Event id " + id);
     }
 }
-  </script>
+  </script> -->
 </head>
 <body>
     <ons-page id="status-page">
